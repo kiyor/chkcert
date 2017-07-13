@@ -6,7 +6,7 @@
 
 * Creation Date : 12-16-2014
 
-* Last Modified : Wed 17 Dec 2014 07:45:20 PM UTC
+* Last Modified : Wed Jul 12 18:31:12 2017
 
 * Created By : Kiyor
 
@@ -24,6 +24,7 @@ import (
 var (
 	OpensslPath      = "/usr/bin/openssl"
 	chkCertCmd       = "${openssl} x509 -text -noout"
+	chkCertCmdShort  = "${openssl} x509 -noout"
 	chkPrivKeyCmd    = "${openssl} rsa -check"
 	chkCertMd5Cmd    = "${openssl} x509 -noout -modulus | ${openssl} md5"
 	chkPrivKeyMd5Cmd = "${openssl} rsa -noout -modulus | ${openssl} md5"
@@ -80,6 +81,23 @@ func ChkCertTime(src string) (before, after time.Time) {
 	a = strings.Replace(a, "  ", " 0", -1)
 	after, _ = time.Parse(certTimeFormat, a)
 
+	return
+}
+
+func ChkCertIssuer(src string) string {
+	return chkCertInfo(src, "issuer")
+}
+func ChkCertSubject(src string) string {
+	return chkCertInfo(src, "subject")
+}
+
+func chkCertInfo(src, attr string) (info string) {
+	cmd := initCmd(chkCertCmdShort, src)
+	cmd += " -" + attr
+	info, _ = golib.Osexec(cmd)
+	if len(info) > len(attr)+2 {
+		info = info[len(attr)+2:]
+	}
 	return
 }
 
